@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "generate:catalog": "node scripts/generate-catalog.mjs",
+    "dev": "npm run generate:catalog && next dev",
+    "build": "npm run generate:catalog && next build",
     "start": "next start",
     "lint": "next lint"
   },

@@ -17,10 +17,19 @@ function defaultThemeValues() {
 
 export function DashboardApp() {
   const [theme, setTheme] = useState<Record<string, string>>(defaultThemeValues);
+  const [activeIndexes, setActiveIndexes] = useState<Record<string, number>>({});
 
   function handleTokenChange(key: string, value: string) {
     setTheme((prev) => ({ ...prev, [key]: value }));
     document.documentElement.style.setProperty(key, value);
+  }
+
+  function handleBlockChange(category: string, direction: -1 | 1) {
+    setActiveIndexes((prev) => {
+      const current = prev[category] ?? 0;
+      const nextIndex = current + direction;
+      return { ...prev, [category]: nextIndex };
+    });
   }
 
   const categories = useMemo(() => {
@@ -30,7 +39,7 @@ export function DashboardApp() {
       list.push(block);
       map.set(block.category, list);
     }
-    return map;
+    return Array.from(map.entries()).map(([category, blocks]) => ({ category, blocks }));
   }, []);
 
   return (
@@ -50,25 +59,56 @@ export function DashboardApp() {
         </aside>
 
         <main className="flex-1 space-y-12">
-          {Array.from(categories.entries()).map(([category, blocks]) => (
-            <section key={category} className="space-y-6">
-              <h2 className="text-lg font-semibold text-[var(--color-text-muted)]">
-                {category}
-              </h2>
-              {blocks.map((block) => (
-                <div
-                  key={block.id}
-                  className="overflow-hidden rounded-xl border border-[var(--color-border)]"
-                >
-                  <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
-                    <span className="text-sm font-medium">{block.name}</span>
-                    <CopyHtmlButton html={block.html} />
+          {categories.map(({ category, blocks }) => {
+            const currentIndex = activeIndexes[category] ?? 0;
+            const currentBlock = blocks[currentIndex] ?? blocks[0];
+            const hasMultipleBlocks = blocks.length > 1;
+
+            return (
+              <section key={category} className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[var(--color-text-muted)]">
+                      {category}
+                    </h2>
+                    {hasMultipleBlocks ? (
+                      <p className="text-sm text-[var(--color-text-muted)]">
+                        Componente {Math.min(currentIndex + 1, blocks.length)} de {blocks.length}
+                      </p>
+                    ) : null}
                   </div>
-                  <BlockPreview html={block.html} />
+                  {hasMultipleBlocks ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleBlockChange(category, -1)}
+                        className="rounded-md border border-[var(--color-border)] px-3 py-2 text-sm"
+                      >
+                        Anterior
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBlockChange(category, 1)}
+                        className="rounded-md border border-[var(--color-border)] px-3 py-2 text-sm"
+                      >
+                        Próximo
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
-              ))}
-            </section>
-          ))}
+
+                {currentBlock ? (
+                  <div className="overflow-hidden rounded-xl border border-[var(--color-border)]">
+                    <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
+                      <span className="text-sm font-medium">{currentBlock.name}</span>
+                      <CopyHtmlButton html={currentBlock.html} />
+                    </div>
+                    <BlockPreview html={currentBlock.html} />
+                  </div>
+                ) : null}
+              </section>
+            );
+          })}
         </main>
       </div>
     </div>
