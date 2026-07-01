@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Estas variáveis existem SOMENTE para preview dentro do dashboard.
+ * O HTML copiado do catálogo nunca depende deste arquivo — no projeto
+ * final (KingHost) essas variáveis vêm do theme.css do próprio cliente.
+ */
+:root {
+  --color-primary: #6366f1;
+  --color-secondary: #0ea5e9;
+  --color-bg: #0b0f19;
+  --color-surface: #111827;
+  --color-text-main: #f9fafb;
+  --color-text-muted: #9ca3af;
+  --color-border: #1f2937;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+}
